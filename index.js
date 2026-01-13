@@ -6,7 +6,7 @@ const {MONGODB} = require('./config')
 const typeDefs = require('./graphql/typeDefs');
 const resolvers = require('./graphql/resolvers/IndexResolvers');
 
-const server = new ApolloServer({typeDefs, resolvers});
+const server = new ApolloServer({typeDefs, resolvers, context: ({req}) => ({req})})
 
 
 mongoose.connect(MONGODB)
