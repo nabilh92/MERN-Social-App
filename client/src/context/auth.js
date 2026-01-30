@@ -1,5 +1,5 @@
 import React, {useReducer, createContext} from 'react';
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from 'jwt-decode';
 
 const initialState = {
     user:null
@@ -26,7 +26,7 @@ const AuthContext = createContext({
     }
 });
 
-function authReducer(state,action){
+function authReducer(state,action){ // Recieves type and payload and determines what to do with application.
     switch(action.type){
         case 'LOGIN':
             return {
@@ -54,10 +54,12 @@ function AuthProvider(props) {
             payload: userData
         });
 
-        function logout() {
-            localStorage.removeItem('jwtToken');
-            dispatch({ type: 'LOGOUT' });
-        }
+       
+    }
+    
+    function logout() {
+        localStorage.removeItem('jwtToken');
+        dispatch({ type: 'LOGOUT' });
     }
 
     return (
@@ -67,3 +69,5 @@ function AuthProvider(props) {
         />
     );
 }
+
+export { AuthContext, AuthProvider };

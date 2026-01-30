@@ -6,7 +6,7 @@ import moment from 'moment';
 import { AuthContext } from '../context/auth';
 import LikeButton from './LikeButton';
 import DeleteButton from './DeleteButton';
-import MyPopup from '../util/MyPopup';
+import MyPopup from '../utils/MyPopup';
 
 function PostCard({
   post: { body, createdAt, id, username, likeCount, commentCount, likes }

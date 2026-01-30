@@ -1,14 +1,16 @@
 import React, { useContext, useState } from 'react';
 import { Button, Form } from 'semantic-ui-react';
-import { useMutation } from '@apollo/react-hooks';
-import gql from 'graphql-tag';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
+import { useNavigate } from 'react-router-dom';
 
 import { AuthContext } from '../context/auth';
-import { useForm } from '../util/hooks';
+import { useForm } from '../utils/hooks';
 
-function Login(props) {
+function Login() {
   const context = useContext(AuthContext);
   const [errors, setErrors] = useState({});
+  const navigate = useNavigate();
 
   const { onChange, onSubmit, values } = useForm(loginUserCallback, {
     username: '',
@@ -23,7 +25,7 @@ function Login(props) {
       }
     ) {
       context.login(userData);
-      props.history.push('/');
+      navigate('/');
     },
     onError(err) {
       setErrors(err.graphQLErrors[0].extensions.exception.errors);

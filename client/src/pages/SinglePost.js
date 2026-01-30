@@ -1,6 +1,7 @@
 import React, { useContext, useState, useRef } from 'react';
-import gql from 'graphql-tag';
-import { useQuery, useMutation } from '@apollo/react-hooks';
+import { gql } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client/react';
+import { useNavigate, useParams } from 'react-router-dom';
 import moment from 'moment';
 import {
   Button,
@@ -15,22 +16,25 @@ import {
 import { AuthContext } from '../context/auth';
 import LikeButton from '../components/LikeButton';
 import DeleteButton from '../components/DeleteButton';
-import MyPopup from '../util/MyPopup';
+import MyPopup from '../utils/MyPopup';
 
-function SinglePost(props) {
-  const postId = props.match.params.postId;
+function SinglePost() {
+  const { postId } = useParams();
+  const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const commentInputRef = useRef(null);
 
   const [comment, setComment] = useState('');
 
   const {
-    data: { getPost }
+    data
   } = useQuery(FETCH_POST_QUERY, {
     variables: {
       postId
     }
   });
+  
+  const getPost = data?.getPost;
 
   const [submitComment] = useMutation(SUBMIT_COMMENT_MUTATION, {
     update() {
@@ -44,7 +48,7 @@ function SinglePost(props) {
   });
 
   function deletePostCallback() {
-    props.history.push('/');
+    navigate('/');
   }
 
   let postMarkup;
@@ -149,7 +153,7 @@ function SinglePost(props) {
 }
 
 const SUBMIT_COMMENT_MUTATION = gql`
-  mutation($postId: String!, $body: String!) {
+  mutation($postId: ID!, $body: String!) {
     createComment(postId: $postId, body: $body) {
       id
       comments {

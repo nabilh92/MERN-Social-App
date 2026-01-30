@@ -1,10 +1,10 @@
 import React from 'react';
 import { Button, Form } from 'semantic-ui-react';
-import gql from 'graphql-tag';
-import { useMutation } from '@apollo/react-hooks';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 
-import { useForm } from '../util/hooks';
-import { FETCH_POSTS_QUERY } from '../util/graphql';
+import { useForm } from '../utils/hooks';
+import { FETCH_POSTS_QUERY } from '../utils/graphql';
 
 function PostForm() {
   const { values, onChange, onSubmit } = useForm(createPostCallback, {
@@ -14,11 +14,18 @@ function PostForm() {
   const [createPost, { error }] = useMutation(CREATE_POST_MUTATION, {
     variables: values,
     update(proxy, result) {
-      const data = proxy.readQuery({
-        query: FETCH_POSTS_QUERY
+      const existing = proxy.readQuery({ query: FETCH_POSTS_QUERY });
+      const existingPosts = existing?.getPosts ?? [];
+      const newPost = result?.data?.createPost;
+
+      if (!newPost) return;
+
+      proxy.writeQuery({
+        query: FETCH_POSTS_QUERY,
+        data: {
+          getPosts: [newPost, ...existingPosts]
+        }
       });
-      data.getPosts = [result.data.createPost, ...data.getPosts];
-      proxy.writeQuery({ query: FETCH_POSTS_QUERY, data });
       values.body = '';
     }
   });
@@ -26,6 +33,12 @@ function PostForm() {
   function createPostCallback() {
     createPost();
   }
+
+  const errorMessage =
+    error?.graphQLErrors?.[0]?.message ??
+    error?.networkError?.message ??
+    error?.message ??
+    'Something went wrong';
 
   return (
     <>
@@ -47,7 +60,7 @@ function PostForm() {
       {error && (
         <div className="ui error message" style={{ marginBottom: 20 }}>
           <ul className="list">
-            <li>{error.graphQLErrors[0].message}</li>
+            <li>{errorMessage}</li>
           </ul>
         </div>
       )}

@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import gql from 'graphql-tag';
-import { useMutation } from '@apollo/react-hooks';
+import { gql } from '@apollo/client';
+import { useMutation } from '@apollo/client/react';
 import { Button, Confirm, Icon } from 'semantic-ui-react';
 
 import { FETCH_POSTS_QUERY } from '../utils/graphql';
-import MyPopup from '../util/MyPopup';
+import MyPopup from '../utils/MyPopup';
 
 function DeleteButton({ postId, commentId, callback }) {
     const [confirmOpen, setConfirmOpen] = useState(false);
@@ -15,11 +15,15 @@ function DeleteButton({ postId, commentId, callback }) {
         update(proxy) {
             setConfirmOpen(false);
             if (!commentId) {
-                const data = proxy.readQuery({
-                    query: FETCH_POSTS_QUERY
+                const existing = proxy.readQuery({ query: FETCH_POSTS_QUERY });
+                const existingPosts = existing?.getPosts ?? [];
+
+                proxy.writeQuery({
+                    query: FETCH_POSTS_QUERY,
+                    data: {
+                        getPosts: existingPosts.filter((p) => p.id !== postId)
+                    }
                 });
-                data.getPosts = data.getPosts.filter((p) => p.id !== postId);
-                proxy.writeQuery({ query: FETCH_POSTS_QUERY, data });
             }
             if (callback) callback();
         },

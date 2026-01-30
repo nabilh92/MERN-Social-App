@@ -30,7 +30,7 @@ module.exports = {
         async createPost(_, { body }, context) {
             const user = checkAuth(context);
 
-            if(args.body.trim() === ''){
+            if(body.trim() === ''){
                 throw new Error('Post body must not be empty')
             }
 
@@ -38,7 +38,7 @@ module.exports = {
                 body,
                 user: user.id,
                 username: user.username,
-                createdAt: new Date().toISOString
+                createdAt: new Date().toISOString()
 
             });
 
@@ -55,7 +55,7 @@ module.exports = {
             try {
                 const post = await Post.findById(postId);
                 if (user.username === post.username) {
-                    await post.delete();
+                    await post.deleteOne();
                     return 'Post deleted successfully'
                 } else {
                     throw new AuthenticationError('Action is invalid')
